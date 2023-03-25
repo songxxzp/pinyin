@@ -7,7 +7,6 @@ def sentence_accuracy(outputs, std_outputs):
     correct = 0
 
     for output, std_output in zip(outputs, std_outputs):
-        # print(output, std_output)
         correct += int(output == std_output)
     
     return correct / total
@@ -24,7 +23,7 @@ def word_accuracy(outputs, std_outputs):
     return correct / total
 
 
-def main():
+def eval():
     for (std_output_file_path, std_output_format), (output_file_path, output_format) in zip(std_output_path, output_path):
         with open(output_file_path, "r", encoding=output_format) as output_file:
             outputs = [line.rstrip() for line in output_file.readlines()]
@@ -36,4 +35,4 @@ def main():
         print("word_accuracy :", word_accuracy(outputs=outputs, std_outputs=std_outputs))
 
 if __name__ == "__main__":
-    main()
+    eval()

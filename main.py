@@ -2,25 +2,27 @@ import os
 import json
 
 from typing import List
+from functools import partial
 
 from config import *
 from model import *
+from metric import *
 
 
-vocabs, pinyin_dict = load_vocab()
-conditional_probabilistic_dict = load_probabilistic_model(vocabs=vocabs)
-
-para_lambda = 0.01
-top_k = 0
-prefix_length = 1
+para_lambda = 0.02
+top_k = 5
+prefix_length = 2
 
 
-def laplace_smoothing_probability(token, prefix=""):   # TODO: apply laplace smoothing on probabilistic model
-    """ laplace smoothing """
-    return get_conditional_probability(conditional_probabilistic_dict, prefix, token) * (1 - para_lambda) + get_conditional_probability(conditional_probabilistic_dict, "", token) * para_lambda
+def smoothing_probability(probabilistic_dict, token, prefix=""):   # TODO: apply laplace smoothing on probabilistic model
+    """ probability smoothing """
+    # if len(prefix) > 1:
+    #     return get_conditional_probability(probabilistic_dict, prefix, token) * (1 - para_lambda) + smoothing_probability(prefix[-1:], token) * para_lambda
+    probability = get_conditional_probability(probabilistic_dict, prefix, token) * (1 - para_lambda) + get_conditional_probability(probabilistic_dict, "", token) * para_lambda
+    return probability
 
 
-def pinyin_to_character(pinyin_str: str):
+def pinyin_to_character(pinyin_str: str, pinyin_dict, conditional_probabilistic_dict):
     pinyin_list = pinyin_str.rstrip("\n").split(" ")
     if len(pinyin_list) < 1:
         return ""
@@ -30,15 +32,21 @@ def pinyin_to_character(pinyin_str: str):
         pinyin = pinyin_list[i]
         for token in pinyin_dict[pinyin]:
             if i == 0:
-                search_state[i][token] = [(laplace_smoothing_probability(token), "")]
+                search_state[i][token] = [(smoothing_probability(conditional_probabilistic_dict, token), "")]
             else:
-                for prefix, max_prefix_prob_list in search_state[i - 1].items():
-                    max_prefix_prob = max_prefix_prob_list[-1][0]
-                    seq_prob = max_prefix_prob * laplace_smoothing_probability(token=token, prefix=prefix)
-                    if token not in search_state[i]:
-                        search_state[i][token] = [(seq_prob, prefix)]
-                    elif seq_prob > search_state[i][token][-1][0]:
-                        search_state[i][token].append((seq_prob, prefix))
+                # print(len(search_state[i - 1].items()))
+                for pre_token, max_prefix_prob_list in search_state[i - 1].items():
+                    for j in range(len(max_prefix_prob_list)):
+                        max_prefix_prob = max_prefix_prob_list[-j][0]
+                        prefix = (max_prefix_prob_list[-j][1] + pre_token)[-prefix_length:]
+                        seq_prob = max_prefix_prob * smoothing_probability(conditional_probabilistic_dict, token, prefix)
+                        if token not in search_state[i]:
+                            search_state[i][token] = [(seq_prob, prefix)]
+                        else:
+                            search_state[i][token].append((seq_prob, prefix))
+                    
+            # print(len(search_state[i][token]))
+            search_state[i][token].sort(key=lambda x: x[0])
             search_state[i][token] = search_state[i][token][- top_k : ]
 
     # get last token with highst probability
@@ -56,14 +64,27 @@ def pinyin_to_character(pinyin_str: str):
         sentence = last_token + sentence
         max_token_prob_list = search_state[i][last_token]
         last_token = max_token_prob_list[-1][1]
+        if len(last_token) > 1:
+            last_token = last_token[-1]
 
     return sentence
 
 
 def main():
+    vocabs, pinyin_dict = load_vocab()
+    conditional_probabilistic_dict = load_probabilistic_model(vocabs=vocabs)
+
+    print("model loaded")
+
+    process_fn = partial(
+        pinyin_to_character,
+        pinyin_dict=pinyin_dict,
+        conditional_probabilistic_dict=conditional_probabilistic_dict
+    )
+
     for (input_file_path, input_format), (output_file_path, output_format) in zip(input_path, output_path):
         with open(input_file_path, "r", encoding=input_format) as input_file:
-            answers = map(pinyin_to_character, input_file.readlines())
+            answers = map(process_fn, input_file.readlines())
         with open(output_file_path, "w", encoding=output_format) as output_file:
             answers = [answer + '\n' for answer in answers]
             output_file.writelines(answers)
@@ -71,5 +92,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
+    eval()

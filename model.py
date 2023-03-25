@@ -1,5 +1,7 @@
 import json
+import pickle
 import os
+import gzip
 
 from typing import Dict, List
 
@@ -34,8 +36,9 @@ def split(content:str, vocabs:Dict) -> List[str]:
     i = 0
     text_list = []
     for j in range(len(content)):
-        if i != j and content[j] not in vocabs:
-            text_list.append(content[i:j])
+        if content[j] not in vocabs:
+            if i != j:
+                text_list.append(content[i:j])
             i = j + 1
     return text_list
 
@@ -86,14 +89,13 @@ def build_frequency_dict(vocabs):
                                 if len(prefix) > max_prefix_length:
                                     break
 
-    with open(frequency_dict_path, "w", encoding="utf-8") as file:
-        json.dump(
+    with gzip.open(frequency_dict_path, "wb") as file:
+        pickle.dump(
             {
                 "config": config,
                 "conditional_frequency_dict": conditional_frequency_dict
             },
-            file,
-            ensure_ascii=False
+            file
         )
     
     return conditional_frequency_dict
@@ -105,19 +107,19 @@ def build_probabilistic_model(conditional_frequency_dict, vocabs):
     conditional_probabilistic_dict[""] = {}
 
     for prefix, token_frequency_dict in conditional_frequency_dict.items():
+        conditional_frequency_dict[prefix] = {}  # release memory
         conditional_probabilistic_dict[prefix] = {}
-        total_conditional_frequency = sum(conditional_frequency_dict[prefix].values())
+        total_conditional_frequency = sum(token_frequency_dict.values())
         for token, frequency in token_frequency_dict.items():
             conditional_probabilistic_dict[prefix][token] = frequency / total_conditional_frequency
 
-    with open(probabilistic_model_path, "w", encoding="utf-8") as file:
-        json.dump(
+    with gzip.open(probabilistic_model_path, "wb") as file:
+        pickle.dump(
             {
                 "config": config,
                 "conditional_probabilistic_dict": conditional_probabilistic_dict
             },
-            file,
-            ensure_ascii=False
+            file
         )
     
     return conditional_probabilistic_dict
@@ -127,12 +129,13 @@ def load_frequency_dict(vocabs):
     if not os.path.exists(frequency_dict_path):
         conditional_frequency_dict: Dict = build_frequency_dict(vocabs=vocabs)
     else:
-        with open(frequency_dict_path, "r", encoding="utf-8") as file:
-            frequency_dict = json.load(file)
+        with gzip.open(frequency_dict_path, "rb") as file:
+            frequency_dict = pickle.load(file)
             if "config" in frequency_dict and config == frequency_dict["config"]:
                 conditional_frequency_dict: Dict = frequency_dict["conditional_frequency_dict"]
             else:
                 conditional_frequency_dict: Dict = build_frequency_dict(vocabs=vocabs)
+
     return conditional_frequency_dict
 
 
@@ -140,10 +143,11 @@ def load_probabilistic_model(vocabs):
     if not os.path.exists(probabilistic_model_path):
         conditional_probabilistic_dict: Dict = build_probabilistic_model(load_frequency_dict(vocabs), vocabs)
     else:
-        with open(probabilistic_model_path, "r", encoding="utf-8") as file:
-            probabilistic_model = json.load(file)
+        with gzip.open(probabilistic_model_path, "rb") as file:
+            probabilistic_model = pickle.load(file)
             if "config" in probabilistic_model and config == probabilistic_model["config"]:
                 conditional_probabilistic_dict: Dict = probabilistic_model["conditional_probabilistic_dict"]
             else:
                 conditional_probabilistic_dict: Dict = build_probabilistic_model(load_frequency_dict(vocabs), vocabs)
+
     return conditional_probabilistic_dict
