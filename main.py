@@ -8,27 +8,16 @@ from model import *
 
 
 vocabs, pinyin_dict = load_vocab()
-# single_token_probabilistic_dict, conditional_probabilistic_dict = build_probabilistic_model(vocabs=vocabs)
-single_token_probabilistic_dict, conditional_probabilistic_dict = load_probabilistic_model()
+conditional_probabilistic_dict = load_probabilistic_model(vocabs=vocabs)
 
 para_lambda = 0.01
 top_k = 0
+prefix_length = 1
 
 
-def laplace_smoothing_probability(token, prefix): #  laplace smoothing
-    if not token in conditional_probabilistic_dict[prefix]:
-        return single_token_probabilistic_dict[token] * para_lambda
-    return conditional_probabilistic_dict[prefix][token] * (1 - para_lambda) + single_token_probabilistic_dict[token] * para_lambda
-
-
-def get_conditional_probability(token, prefix=None):
-    if token not in vocabs:
-        return 0
-    if prefix is None:
-        return single_token_probabilistic_dict[token]
-    if prefix not in vocabs:
-        return 0
-    return laplace_smoothing_probability(token=token, prefix=prefix)
+def laplace_smoothing_probability(token, prefix=""):   # TODO: apply laplace smoothing on probabilistic model
+    """ laplace smoothing """
+    return get_conditional_probability(conditional_probabilistic_dict, prefix, token) * (1 - para_lambda) + get_conditional_probability(conditional_probabilistic_dict, "", token) * para_lambda
 
 
 def pinyin_to_character(pinyin_str: str):
@@ -41,19 +30,16 @@ def pinyin_to_character(pinyin_str: str):
         pinyin = pinyin_list[i]
         for token in pinyin_dict[pinyin]:
             if i == 0:
-                search_state[i][token] = [(get_conditional_probability(token), None)]  # TODO: Use ""
-                # print(token, search_state[i][token])
-                # input()
+                search_state[i][token] = [(laplace_smoothing_probability(token), "")]
             else:
                 for prefix, max_prefix_prob_list in search_state[i - 1].items():
                     max_prefix_prob = max_prefix_prob_list[-1][0]
-                    seq_prob = max_prefix_prob * get_conditional_probability(token=token, prefix=prefix)
+                    seq_prob = max_prefix_prob * laplace_smoothing_probability(token=token, prefix=prefix)
                     if token not in search_state[i]:
                         search_state[i][token] = [(seq_prob, prefix)]
                     elif seq_prob > search_state[i][token][-1][0]:
                         search_state[i][token].append((seq_prob, prefix))
             search_state[i][token] = search_state[i][token][- top_k : ]
-            # print(len(search_state[i][token]))
 
     # get last token with highst probability
     last_token = ""
@@ -70,8 +56,6 @@ def pinyin_to_character(pinyin_str: str):
         sentence = last_token + sentence
         max_token_prob_list = search_state[i][last_token]
         last_token = max_token_prob_list[-1][1]
-    
-    # print(pinyin_str, sentence)
 
     return sentence
 
