@@ -80,27 +80,35 @@ def get_conditional_probability(conditional_probabilistic_dict, prefix, token):
     return conditional_probabilistic_dict[prefix][token]
 
 
+def process_content(content, conditional_frequency_dict, vocabs):
+    # split content by none vocabs
+    text_list = split(content, vocabs=vocabs)
+    for text in text_list:
+        for suffix_start_pos in range(len(text)):
+            suffix = text[suffix_start_pos : ]
+            prefix = ""
+            for token in suffix:
+                add_conditional_frequency(conditional_frequency_dict, prefix, token, frequency=1)
+                prefix += token
+                if len(prefix) > max_prefix_length:
+                    break
+
+
 def build_frequency_dict(vocabs):
     # build frequency dict
     conditional_frequency_dict = {}
 
-    for path, format, labels in corpora_path:  # should be jsonl
+    for path, format, labels in corpora_path:  # should be jsonl or txt
         with open(path, "r", encoding=format) as file:
             for line in file.readlines():
-                content_dict = json.loads(line)
-                for label in labels:
-                    content = content_dict[label]
-                    # split content by none vocabs
-                    text_list = split(content, vocabs=vocabs)
-                    for text in text_list:
-                        for suffix_start_pos in range(len(text)):
-                            suffix = text[suffix_start_pos : ]
-                            prefix = ""
-                            for token in suffix:
-                                add_conditional_frequency(conditional_frequency_dict, prefix, token, frequency=1)
-                                prefix += token
-                                if len(prefix) > max_prefix_length:
-                                    break
+                if len(labels):  # json
+                    content_dict = json.loads(line)
+                    for label in labels:
+                        content = content_dict[label]
+                        process_content(content, conditional_frequency_dict, vocabs)
+                else:
+                    content = line.rstrip('\n')
+                    process_content(content, conditional_frequency_dict, vocabs)
 
     with gzip.open(frequency_dict_path, "wb") as file:
         pickle.dump(

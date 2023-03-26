@@ -58,7 +58,7 @@ def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_condit
 
 def main():
     _, pinyin_dict = load_vocab()
-    selector = get_top_k_selector("gpt")  # default, std, gpt
+    selector = get_top_k_selector("default")  # default, std, gpt
     probability_fn = get_probability_function("interpolation")  # interpolation, laplace
 
     process_fn = partial(
