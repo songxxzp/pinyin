@@ -7,6 +7,7 @@ from typing import Dict, List
 
 from config import *
 
+
 def load_vocab():
     # load vocab
     vocabs = {}
@@ -143,9 +144,13 @@ def load_frequency_dict(vocabs):
     else:
         with gzip.open(frequency_dict_path, "rb") as file:
             frequency_dict = pickle.load(file)
-            if "config" in frequency_dict and config == frequency_dict["config"]:
-                conditional_frequency_dict: Dict = frequency_dict["conditional_frequency_dict"]
-            else:
+            try:
+                if "config" in frequency_dict and config["max_prefix_length"] == frequency_dict["config"]["max_prefix_length"]:
+                    conditional_frequency_dict: Dict = frequency_dict["conditional_frequency_dict"]
+                else:
+                    conditional_frequency_dict: Dict = build_frequency_dict(vocabs=vocabs)
+            except Exception as exception:
+                print(exception)
                 conditional_frequency_dict: Dict = build_frequency_dict(vocabs=vocabs)
 
     return conditional_frequency_dict
@@ -166,11 +171,15 @@ def load_probabilistic_model(vocabs, conditional_frequency_dict=None):
     else:
         with gzip.open(probabilistic_model_path, "rb") as file:
             probabilistic_model = pickle.load(file)
-            if "config" in probabilistic_model and config == probabilistic_model["config"]:
-                conditional_probabilistic_dict: Dict = probabilistic_model["conditional_probabilistic_dict"]
-            else:
-                if conditional_frequency_dict is None:
-                    conditional_frequency_dict = load_frequency_dict(vocabs)
+            try:
+                if "config" in probabilistic_model and config["max_prefix_length"] == probabilistic_model["config"]["max_prefix_length"]:
+                    conditional_probabilistic_dict: Dict = probabilistic_model["conditional_probabilistic_dict"]
+                else:
+                    if conditional_frequency_dict is None:
+                        conditional_frequency_dict = load_frequency_dict(vocabs)
+                    conditional_probabilistic_dict: Dict = build_probabilistic_model(conditional_frequency_dict, vocabs)
+            except Exception as exception:
+                print(exception)
                 conditional_probabilistic_dict: Dict = build_probabilistic_model(conditional_frequency_dict, vocabs)
 
     return conditional_probabilistic_dict

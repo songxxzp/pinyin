@@ -4,12 +4,10 @@ from torch.nn import CrossEntropyLoss
 from typing import List
 from torch import tensor
 from torch.nn.functional import softmax
-from transformers import BertTokenizerFast, AutoModel, AutoTokenizer, GPT2Config, BertTokenizer, GPT2LMHeadModel, TextGenerationPipeline
+from transformers import BertTokenizerFast, AutoModel, AutoTokenizer, GPT2Config, BertTokenizer, GPT2LMHeadModel, BertTokenizer, BartForConditionalGeneration
 
 
 def load_gpt_model(device="cpu"):
-    # model = GPT2LMHeadModel.from_pretrained("ckiplab/gpt2-tiny-chinese").to(device)
-    # tokenizer = BertTokenizerFast.from_pretrained('bert-base-chinese')
     tokenizer = BertTokenizer.from_pretrained("uer/gpt2-chinese-cluecorpussmall")
     model = GPT2LMHeadModel.from_pretrained("uer/gpt2-chinese-cluecorpussmall").to(device)
 

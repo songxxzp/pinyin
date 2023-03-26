@@ -1,7 +1,6 @@
 import json
 
 
-# data_path = "/home/song/下载/拼音输入法作业-2023春/"
 model_config_path = "/home/song/workspace/pinyin/trigram/config.json"
 
 with open(model_config_path, "r", encoding="utf-8") as file:
