@@ -100,9 +100,46 @@ def process_content(content, conditional_frequency_dict, vocabs):
 
 def build_frequency_dict(vocabs):
     # build frequency dict
+    print("Building conditional frequency dict")
     conditional_frequency_dict = {}
+    frequency_dict = None  # frequency dict cache
+
+    if os.path.exists(frequency_dict_path + ".cache"):  # use cache
+        with gzip.open(frequency_dict_path + ".cache", "rb") as file:
+            frequency_dict = pickle.load(file)
+            try:
+                if "config" in frequency_dict and config["max_prefix_length"] == frequency_dict["config"]["max_prefix_length"]:
+                    print("Loaded cache, trained on:")
+                    cache_check = True
+                    for path, format, labels in frequency_dict["config"]["corpora_path"]:
+                        print((path, format, labels))
+                        if path not in [data_path for data_path, _, _ in corpora_path]:
+                            print("Unknown :", path)
+                            cache_check = False
+                    if cache_check:
+                        conditional_frequency_dict: Dict = frequency_dict["conditional_frequency_dict"]
+                    else:
+                        frequency_dict = None
+                        print("Found unknown corpus, cache cannot be used.")
+                else:
+                    frequency_dict = None
+                    conditional_frequency_dict = {}
+            except Exception as exception:
+                print(exception)
+                frequency_dict = None
+                conditional_frequency_dict = {}
 
     for path, format, labels in corpora_path:  # should be jsonl or txt
+        print("Processing :", (path, format, labels))
+
+        if frequency_dict is not None:
+            try:
+                if path in [data_path for data_path, _, _ in frequency_dict["config"]["corpora_path"]]:
+                    print("Use cache :", (path, format, labels))
+                    continue
+            except Exception as exception:
+                print(exception)
+
         with open(path, "r", encoding=format) as file:
             for line in file.readlines():
                 line = line.rstrip('\n')
@@ -120,6 +157,7 @@ def build_frequency_dict(vocabs):
                     print("Cannot load line, check your format:", line)
 
     with gzip.open(frequency_dict_path, "wb") as file:
+        print("saving :", frequency_dict_path)
         pickle.dump(
             {
                 "config": config,
@@ -133,6 +171,7 @@ def build_frequency_dict(vocabs):
 
 def build_probabilistic_model(conditional_frequency_dict, vocabs):
     # build probabilistic model
+    print("Building probabilistic model")
     conditional_probabilistic_dict = {}
     conditional_probabilistic_dict[""] = {}
 
@@ -144,6 +183,7 @@ def build_probabilistic_model(conditional_frequency_dict, vocabs):
             conditional_probabilistic_dict[prefix][token] = frequency / total_conditional_frequency
 
     with gzip.open(probabilistic_model_path, "wb") as file:
+        print("saving :", probabilistic_model_path)
         pickle.dump(
             {
                 "config": config,
@@ -187,6 +227,7 @@ def load_probabilistic_model(vocabs, conditional_frequency_dict=None):
         conditional_probabilistic_dict: Dict = build_probabilistic_model(conditional_frequency_dict, vocabs)
     else:
         with gzip.open(probabilistic_model_path, "rb") as file:
+            print("Loading probabilistic model")
             probabilistic_model = pickle.load(file)
             try:
                 if "config" in probabilistic_model and config["max_prefix_length"] == probabilistic_model["config"]["max_prefix_length"]:
