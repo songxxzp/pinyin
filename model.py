@@ -105,14 +105,19 @@ def build_frequency_dict(vocabs):
     for path, format, labels in corpora_path:  # should be jsonl or txt
         with open(path, "r", encoding=format) as file:
             for line in file.readlines():
-                if len(labels):  # json
-                    content_dict = json.loads(line)
-                    for label in labels:
-                        content = content_dict[label]
+                line = line.rstrip('\n')
+                try:
+                    if len(labels) and line:  # jsonl
+                        content_dict = json.loads(line)
+                        for label in labels:
+                            content = content_dict[label]
+                            process_content(content, conditional_frequency_dict, vocabs)
+                    else:
+                        content = line
                         process_content(content, conditional_frequency_dict, vocabs)
-                else:
-                    content = line.rstrip('\n')
-                    process_content(content, conditional_frequency_dict, vocabs)
+                except Exception as exception:
+                    print(exception)
+                    print("Cannot load line, check your format:", line)
 
     with gzip.open(frequency_dict_path, "wb") as file:
         pickle.dump(

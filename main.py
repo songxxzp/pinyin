@@ -8,7 +8,7 @@ from functools import partial
 from config import load_config
 
 load_config(
-    model_path="/home/song/workspace/pinyin/trigram_weibo",
+    model_path="/home/song/workspace/pinyin/trigram_weibo_newscrawl_baike",
     input_file_path="/home/song/下载/拼音输入法作业-2023春/测试语料/input.txt",
     std_file_path="/home/song/下载/拼音输入法作业-2023春/测试语料/std_output.txt",
     output_file_path="/home/song/workspace/pinyin/output.txt"
@@ -23,11 +23,11 @@ from model import load_vocab
 
 
 para_lambda = 0.03  # 0.03
-top_k_storage = 40
-top_k_calculate = 40
+top_k_storage = 10
+top_k_calculate = 10
 max_conditional_prefix_length = 2
 normalized = False
-top_k_selector = "std"  # default, std, gpt
+top_k_selector = "default"  # default, std, gpt
 probability_function = "interpolation"  # interpolation, laplace
 device = "cuda"
 

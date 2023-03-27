@@ -1,7 +1,6 @@
 {
     "max_prefix_length": 2,
     "corpora_path": [
-        ["/home/song/下载/拼音输入法作业-2023春/语料库/语料库/SMP2020/usual_train_new.txt", "gbk", []],
         ["/home/song/下载/拼音输入法作业-2023春/语料库/语料库/sina_news_gbk/2016-02.txt", "gbk", ["html", "title"]],
         ["/home/song/下载/拼音输入法作业-2023春/语料库/语料库/sina_news_gbk/2016-04.txt", "gbk", ["html", "title"]],
         ["/home/song/下载/拼音输入法作业-2023春/语料库/语料库/sina_news_gbk/2016-05.txt", "gbk", ["html", "title"]],
