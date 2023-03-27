@@ -30,7 +30,7 @@ def std_top_k_selector(seq_list: List[str], std_list) -> str:
     return seq_list[0]
 
 
-def get_top_k_selector(selector_type="default", device=None):
+def get_top_k_selector(selector_type="default", device=None, tokenizer_name="uer/gpt2-chinese-cluecorpussmall", model_name="uer/gpt2-chinese-cluecorpussmall"):
     """
         return a selector
     """
@@ -43,7 +43,7 @@ def get_top_k_selector(selector_type="default", device=None):
                 device="cuda"
             else:
                 device="cpu"
-        model, tokenizer = load_gpt_model(device=device)
+        model, tokenizer = load_gpt_model(device=device, tokenizer_name=tokenizer_name, model_name=model_name)
         selector = partial(
             gpt_top_k_selector,
             model=model,

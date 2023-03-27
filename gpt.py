@@ -7,9 +7,9 @@ from torch.nn.functional import softmax
 from transformers import BertTokenizerFast, AutoModel, AutoTokenizer, GPT2Config, BertTokenizer, GPT2LMHeadModel, BertTokenizer, BartForConditionalGeneration
 
 
-def load_gpt_model(device="cpu"):
-    tokenizer = BertTokenizer.from_pretrained("uer/gpt2-chinese-cluecorpussmall")
-    model = GPT2LMHeadModel.from_pretrained("uer/gpt2-chinese-cluecorpussmall").to(device)
+def load_gpt_model(device="cpu", tokenizer_name="uer/gpt2-chinese-cluecorpussmall", model_name="uer/gpt2-chinese-cluecorpussmall"):
+    tokenizer = BertTokenizer.from_pretrained(tokenizer_name)
+    model = GPT2LMHeadModel.from_pretrained(model_name).to(device)
 
     return model, tokenizer
 
