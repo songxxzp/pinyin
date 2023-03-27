@@ -5,18 +5,29 @@ import math
 from typing import List
 from functools import partial
 
+from config import load_config
+
+load_config(
+    model_path="/home/song/workspace/pinyin/trigram_weibo",
+    input_file_path="/home/song/下载/拼音输入法作业-2023春/测试语料/input.txt",
+    std_file_path="/home/song/下载/拼音输入法作业-2023春/测试语料/std_output.txt",
+    output_file_path="/home/song/workspace/pinyin/output.txt"
+)
+
 from config import *
+
 from metric import eval
 from selector import default_top_k_selector, get_top_k_selector
 from probability import get_probability_function
 from model import load_vocab
 
 
-para_lambda = 0.03
-top_k_storage = 10
-top_k_calculate = 10
+para_lambda = 0.03  # 0.03
+top_k_storage = 40
+top_k_calculate = 40
 max_conditional_prefix_length = 2
-top_k_selector = "default"  # default, std, gpt
+normalized = False
+top_k_selector = "std"  # default, std, gpt
 probability_function = "interpolation"  # interpolation, laplace
 device = "cuda"
 
@@ -61,7 +72,7 @@ def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_condit
 def main():
     _, pinyin_dict = load_vocab()
     selector = get_top_k_selector(top_k_selector, device=device) # default, std, gpt
-    probability_fn = get_probability_function(probability_function)  # interpolation, laplace
+    probability_fn = get_probability_function(probability_function, para_lambda=para_lambda, normalized=normalized)  # interpolation, laplace
 
     process_fn = partial(
         pinyin_to_character,
@@ -83,5 +94,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print(para_lambda, top_k_storage, top_k_calculate, max_conditional_prefix_length, top_k_selector, top_k_selector)
+    print(para_lambda, top_k_storage, top_k_calculate, max_conditional_prefix_length, top_k_selector, probability_function)
     eval()

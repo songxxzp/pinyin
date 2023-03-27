@@ -42,8 +42,8 @@ def split(content:str, vocabs:Dict) -> List[str]:
                 text_list.append(content[i:j])
             i = j + 1
 
-    if i != j:
-        text_list.append(content[i:j])
+    if i != len(content):
+        text_list.append(content[i:])
 
     return text_list
 

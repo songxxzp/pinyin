@@ -28,6 +28,8 @@ def normalized_probability(pinyin_dict, probability_fn, token, pinyin, prefix=""
         return p(token|prefix, pinyin)
     """
     probability = probability_fn(token=token, prefix=prefix)
+    if probability == 0:
+        return 0
     totall_probability = sum([probability_fn(token=token, prefix=prefix) for token in pinyin_dict[pinyin]])
     return probability / totall_probability
 
