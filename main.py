@@ -16,7 +16,9 @@ para_lambda = 0.03
 top_k_storage = 10
 top_k_calculate = 10
 max_conditional_prefix_length = 2
-
+top_k_selector = "default"  # default, std, gpt
+probability_function = "interpolation"  # interpolation, laplace
+device = "cuda"
 
 def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_conditional_prefix_length=1, top_k_storage=1, top_k_calculate=1, top_k_selector=default_top_k_selector):
     pinyin_list = pinyin_str.rstrip("\n").split(" ")
@@ -58,8 +60,8 @@ def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_condit
 
 def main():
     _, pinyin_dict = load_vocab()
-    selector = get_top_k_selector("default")  # default, std, gpt
-    probability_fn = get_probability_function("interpolation")  # interpolation, laplace
+    selector = get_top_k_selector(top_k_selector, device=device) # default, std, gpt
+    probability_fn = get_probability_function(probability_function)  # interpolation, laplace
 
     process_fn = partial(
         pinyin_to_character,
@@ -81,5 +83,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print(top_k_storage, top_k_calculate, max_conditional_prefix_length)
+    print(para_lambda, top_k_storage, top_k_calculate, max_conditional_prefix_length, top_k_selector, top_k_selector)
     eval()

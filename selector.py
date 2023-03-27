@@ -30,18 +30,19 @@ def std_top_k_selector(seq_list: List[str], std_list) -> str:
     return seq_list[0]
 
 
-def get_top_k_selector(selector_type="default"):
+def get_top_k_selector(selector_type="default", device=None):
     """
         return a selector
     """
     selector = default_top_k_selector
     if selector_type == "gpt":
         from gpt import load_gpt_model, perplexity
-        import torch
-        if torch.cuda.is_available():
-            device="cuda"
-        else:
-            device="cpu"
+        if device is None:
+            import torch
+            if torch.cuda.is_available():
+                device="cuda"
+            else:
+                device="cpu"
         model, tokenizer = load_gpt_model(device=device)
         selector = partial(
             gpt_top_k_selector,
