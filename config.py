@@ -1,5 +1,9 @@
+import sys
 import os
 import json
+
+from typing import List, Union
+from utils import extract_data_path
 
 model_config_path = ""
 frequency_dict_path = ""
@@ -9,18 +13,17 @@ config = {}
 
 max_prefix_length = 0
 corpora_path = []
-vocab_path = []
-pinyin_path = []
+vocab_path = [[os.path.join(os.path.dirname(os.path.realpath(__file__)), "./task_data/vocab.txt"), "gbk"]]
+pinyin_path = [[os.path.join(os.path.dirname(os.path.realpath(__file__)), "./task_data/pinyin.txt"), "gbk"]]
 
 input_path = []
 std_output_path = []
 output_path = []
 
-def load_config(model_path, input_file_path, std_file_path, output_file_path):
+def load_config(model_path, output_file_path: Union[List, None]=None, input_file_path: Union[List, None]=None, std_file_path: Union[List, None]=None, vocab_file_path: Union[List, None]=None, pinyin_file_path: Union[List, None]=None):
     global model_config_path, frequency_dict_path, probabilistic_model_path, config
     global max_prefix_length, corpora_path, vocab_path, pinyin_path
     global input_path, std_output_path, output_path
-    # model_path = "/home/song/workspace/pinyin/trigram_news_2017_to_2022_with_sina"
 
     model_config_path = os.path.join(model_path, "config.json")
     frequency_dict_path = os.path.join(model_path, "frequency_dict.gz")
@@ -30,9 +33,28 @@ def load_config(model_path, input_file_path, std_file_path, output_file_path):
         config = json.load(file)
 
     max_prefix_length = config["max_prefix_length"]
-    corpora_path = config["corpora_path"]
-    vocab_path = config["vocab_path"]
-    pinyin_path = config["pinyin_path"]
+    corpora_path = extract_data_path(config["corpora_path"])
+
+    if output_file_path is None:
+        output_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "./output.txt")
+
+    if input_file_path is None:
+        input_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "./task_data/input.txt")
+
+    if std_file_path is None:
+        std_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "./task_data/std_output.txt")
+
+    if "vocab_path" in config and config["vocab_path"]:
+        vocab_path = config["vocab_path"]
+
+    if "pinyin_path" in config and config["pinyin_path"]:
+        pinyin_path = config["pinyin_path"]
+
+    if vocab_file_path is not None:
+        vocab_path = vocab_file_path
+
+    if pinyin_file_path is not None:
+        pinyin_path = pinyin_file_path
 
     if isinstance(input_file_path, str):
         input_file_path = [(input_file_path, "utf-8")]
@@ -44,6 +66,3 @@ def load_config(model_path, input_file_path, std_file_path, output_file_path):
     input_path = input_file_path
     std_output_path = std_file_path
     output_path = output_file_path
-    # input_path = [("/home/song/下载/拼音输入法作业-2023春/测试语料/input.txt", "utf-8")]
-    # std_output_path = [("/home/song/下载/拼音输入法作业-2023春/测试语料/std_output.txt", "utf-8")]
-    # output_path = [("/home/song/workspace/pinyin/output.txt", "utf-8")]

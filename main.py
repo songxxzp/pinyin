@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import math
 import time
@@ -9,11 +10,10 @@ from functools import partial
 
 from config import load_config
 
+current_path = os.path.dirname(os.path.realpath(__file__))
+
 load_config(
-    model_path="/home/song/workspace/pinyin/bigram_weibo",  # trigram_weibo_newscrawl_baike, trigram_newscrawl_baike, bigram_weibo
-    input_file_path="/home/song/下载/拼音输入法作业-2023春/测试语料/input.txt",
-    std_file_path="/home/song/下载/拼音输入法作业-2023春/测试语料/std_output.txt",
-    output_file_path="/home/song/workspace/pinyin/output.txt"
+    model_path="/home/junli/workspace/pinyin/trigram_weibo_newscrawl_baike"  # trigram_weibo_newscrawl_baike, trigram_newscrawl_baike, bigram_weibo
 )
 
 from config import *
@@ -24,14 +24,28 @@ from probability import get_probability_function
 from model import load_vocab
 
 
-para_lambda = 0.03  # 0.03
-top_k_storage = 2
-top_k_calculate = 2
+interpolation_lambda = 0.01  # 0.03
+top_k_storage = 4
+top_k_calculate = 4
 max_conditional_prefix_length = 2
 normalized = False
 top_k_selector = "default"  # default, std, gpt
 probability_function = "interpolation"  # interpolation, laplace
 device = "cuda"
+
+
+def print_parameter():
+    print("max conditional prefix length :", max_conditional_prefix_length)
+    print("top k storage :", top_k_storage)
+    print("top k calculate :", top_k_calculate)
+    print("top k selector :", top_k_selector)
+    if top_k_selector == "gpt":
+        print("    device", device)
+    print("probability function :", probability_function)
+    if probability_function == "interpolation":
+        print("    lambda :", interpolation_lambda)
+    print("normalized :", normalized)
+
 
 def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_conditional_prefix_length=1, top_k_storage=1, top_k_calculate=1, top_k_selector=default_top_k_selector):
     pinyin_list = pinyin_str.rstrip("\n").split(" ")
@@ -72,7 +86,7 @@ def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_condit
 def inference():
     _, pinyin_dict = load_vocab()
     selector = get_top_k_selector(top_k_selector, device=device) # default, std, gpt
-    probability_fn = get_probability_function(probability_function, para_lambda=para_lambda, normalized=normalized)  # interpolation, laplace
+    probability_fn = get_probability_function(probability_function, para_lambda=interpolation_lambda, normalized=normalized)  # interpolation, laplace
 
     process_fn = partial(
         pinyin_to_character,
@@ -84,19 +98,28 @@ def inference():
         top_k_selector=selector
     )
 
+    time_usage = 0
+
     for (input_file_path, input_format), (output_file_path, output_format) in zip(input_path, output_path):
-        print("Inferencing")
         with open(input_file_path, "r", encoding=input_format) as input_file:
             start_time = time.time()
             answers = list(map(process_fn, input_file.readlines()))
             stop_time = time.time()
-            print("Time usage : {}s".format(str(round(stop_time - start_time, 2))))
+            time_usage += stop_time - start_time
         with open(output_file_path, "w", encoding=output_format) as output_file:
             answers = [answer + '\n' for answer in answers]
             output_file.writelines(answers)
+    
+    return time_usage
 
 
 if __name__ == "__main__":
-    inference()
-    print(para_lambda, top_k_storage, top_k_calculate, max_conditional_prefix_length, top_k_selector, probability_function)
-    eval()
+    print("Inferencing")
+
+    print_parameter()
+    time_usage = inference()
+    print("Time usage : {}s".format(str(round(time_usage, 2))))
+    
+    sentence_acc, word_acc = eval()
+    print("sentence accuracy :", sentence_acc)
+    print("word accuracy :", word_acc)
