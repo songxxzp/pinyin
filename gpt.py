@@ -46,3 +46,23 @@ def perplexity(seq: List[str], model, tokenizer):
     meanloss = loss.sum(1) / shift_attentions.sum(1)
     ppl = torch.exp(meanloss).tolist()
     return ppl
+
+
+if __name__ == "__main__":
+    model, tokenizer = load_gpt_model(device="cuda")
+
+    seq = ["北京市首个举办过夏奥会与冬奥会的城市", "北京是首个举办过夏奥会与冬奥会的城市", "用干毛毛不怕困难", "勇敢猫猫不怕困难", "晶状体有痛心的纤维细胞层组成", "晶状体由同心的纤维细胞层组成", "毕竟老佛爷不是什么恶魔", "毕竟老夫也不是什么恶魔"]
+
+    input_ids = tokenizer(seq, return_tensors='pt', padding=True).to(model.device)
+    logits = model(**input_ids).logits
+
+    shift_logits = logits[:, :-1, :].contiguous()
+    shift_labels = input_ids['input_ids'][:, 1:].contiguous()
+    shift_attentions = input_ids['attention_mask'][:, 1:].contiguous()
+
+    loss_fn = CrossEntropyLoss(ignore_index=0, reduction="none")
+    loss = loss_fn(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1)).detach().reshape(len(seq), -1)
+    meanloss = loss.sum(1) / shift_attentions.sum(1)
+    ppl = torch.exp(meanloss).tolist()
+
+    print(ppl)

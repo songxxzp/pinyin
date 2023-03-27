@@ -13,7 +13,8 @@ from config import load_config
 current_path = os.path.dirname(os.path.realpath(__file__))
 
 load_config(
-    model_path="/home/junli/workspace/pinyin/trigram_weibo_newscrawl_baike"  # trigram_weibo_newscrawl_baike, trigram_newscrawl_baike, bigram_weibo
+    model_path="/home/song/workspace/pinyin/trigram_weibo_newscrawl_baike_webtext_wiki",  # trigram_weibo_newscrawl_baike_webtext, trigram_weibo_newscrawl_baike, trigram_newscrawl_baike, bigram_weibo
+    output_file_path=os.path.join(current_path, "./output_default_selector.txt")
 )
 
 from config import *
@@ -25,8 +26,8 @@ from model import load_vocab
 
 
 interpolation_lambda = 0.01  # 0.03
-top_k_storage = 4
-top_k_calculate = 4
+top_k_storage = 10
+top_k_calculate = 10
 max_conditional_prefix_length = 2
 normalized = False
 top_k_selector = "default"  # default, std, gpt
@@ -100,6 +101,8 @@ def inference():
 
     time_usage = 0
 
+    print("Inferencing")
+
     for (input_file_path, input_format), (output_file_path, output_format) in zip(input_path, output_path):
         with open(input_file_path, "r", encoding=input_format) as input_file:
             start_time = time.time()
@@ -114,12 +117,10 @@ def inference():
 
 
 if __name__ == "__main__":
-    print("Inferencing")
-
-    print_parameter()
     time_usage = inference()
+    print_parameter()
     print("Time usage : {}s".format(str(round(time_usage, 2))))
-    
+
     sentence_acc, word_acc = eval()
     print("sentence accuracy :", sentence_acc)
     print("word accuracy :", word_acc)
