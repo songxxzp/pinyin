@@ -8,13 +8,19 @@ import copy
 from typing import List
 from functools import partial
 
+from args import get_parser
+parser = get_parser()
+args = parser.parse_args()
+
 from config import load_config
 
-current_path = os.path.dirname(os.path.realpath(__file__))
-
 load_config(
-    model_path="/home/junli/workspace/pinyin/trigram_sina_weibo_newscrawl_baike_webtext_wiki",  # trigram_weibo_newscrawl_baike_webtext, trigram_weibo_newscrawl_baike, trigram_newscrawl_baike, bigram_weibo
-    output_file_path=os.path.join(current_path, "./output_default_selector.txt")
+    model_path=args.model_path,
+    output_file_path=args.output_file_path,
+    input_file_path=args.input_file_path,
+    std_file_path=args.std_file_path,
+    vocab_file_path=args.vocab_file_path,
+    pinyin_file_path=args.pinyin_file_path
 )
 
 from config import *
@@ -25,34 +31,21 @@ from probability import get_probability_function
 from model import load_vocab
 
 
-probability_function = "interpolation"  # interpolation, laplace
-interpolation_lambda = 0.03  # 0.03
-top_k_storage = 10
-top_k_calculate = 10
-max_conditional_prefix_length = 2
-normalized = False
-storage_top_k_selector = "default"  # default, std, gpt
-calculate_top_k_selector = "default"  # default, std, gpt
-final_top_k_selector = "std"  # default, std, gpt
-batch_size = 0
-device = "cuda"
-
-
-def print_parameter():
-    print("max conditional prefix length :", max_conditional_prefix_length)
-    print("top k storage :", top_k_storage)
-    print("top k calculate :", top_k_calculate)
-    print("calculate top k selector :", calculate_top_k_selector)
-    print("storage top k selector :", storage_top_k_selector)
-    print("final top k selector :", final_top_k_selector)
-    if final_top_k_selector == "gpt" or storage_top_k_selector == "gpt" or calculate_top_k_selector == "gpt":
-        if batch_size:
-            print("    batchsize", batch_size)
-        print("    device", device)
-    print("probability function :", probability_function)
-    if probability_function == "interpolation":
-        print("    lambda :", interpolation_lambda)
-    print("normalized :", normalized)
+def print_parameter(args):
+    print("max conditional prefix length :", args.max_conditional_prefix_length)
+    print("top k storage :", args.top_k_storage)
+    print("top k calculate :", args.top_k_calculate)
+    print("calculate top k selector :", args.calculate_top_k_selector)
+    print("storage top k selector :", args.storage_top_k_selector)
+    print("final top k selector :", args.final_top_k_selector)
+    if args.final_top_k_selector == "gpt" or args.storage_top_k_selector == "gpt" or args.calculate_top_k_selector == "gpt":
+        if args.batch_size:
+            print("    batchsize", args.batch_size)
+        print("    device", args.device)
+    print("probability function :", args.probability_function)
+    if args.probability_function == "interpolation":
+        print("    lambda :", args.interpolation_lambda)
+    print("normalized :", args.normalized)
 
 
 def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_conditional_prefix_length=1, top_k_storage=1, top_k_calculate=1, final_top_k_selector=default_top_k_selector, storage_top_k_selector=default_top_k_selector, calculate_top_k_selector=default_top_k_selector):
@@ -91,18 +84,18 @@ def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_condit
 
 def inference():
     _, pinyin_dict = load_vocab()
-    final_selector = get_top_k_selector(final_top_k_selector, device=device, batch_size=batch_size) # default, std, gpt
-    storage_selector = get_top_k_selector(storage_top_k_selector, device=device, batch_size=batch_size)
-    calculate_selector = get_top_k_selector(calculate_top_k_selector, device=device, batch_size=batch_size)
-    probability_fn = get_probability_function(probability_function, para_lambda=interpolation_lambda, normalized=normalized)  # interpolation, laplace
+    final_selector = get_top_k_selector(args.final_top_k_selector, device=args.device, batch_size=args.batch_size) # default, std, gpt
+    storage_selector = get_top_k_selector(args.storage_top_k_selector, device=args.device, batch_size=args.batch_size)
+    calculate_selector = get_top_k_selector(args.calculate_top_k_selector, device=args.device, batch_size=args.batch_size)
+    probability_fn = get_probability_function(args.probability_function, para_lambda=args.interpolation_lambda, normalized=args.normalized)  # interpolation, laplace
 
     process_fn = partial(
         pinyin_to_character,
         probability_fn=probability_fn,
         pinyin_dict=pinyin_dict,
-        max_conditional_prefix_length=min(max_conditional_prefix_length, max_prefix_length),
-        top_k_storage=top_k_storage,
-        top_k_calculate=top_k_calculate,
+        max_conditional_prefix_length=min(args.max_conditional_prefix_length, max_prefix_length),
+        top_k_storage=args.top_k_storage,
+        top_k_calculate=args.top_k_calculate,
         final_top_k_selector=final_selector,
         storage_top_k_selector=storage_selector,
         calculate_top_k_selector=calculate_selector
@@ -127,7 +120,7 @@ def inference():
 
 if __name__ == "__main__":
     time_usage = inference()
-    print_parameter()
+    print_parameter(args)
     print("Time usage : {}s".format(str(round(time_usage, 2))))
 
     sentence_acc, word_acc = eval()
