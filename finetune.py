@@ -54,7 +54,7 @@ def process_data():
                                 content = content_dict[label]
                                 full_text_list.append(content)
                         except Exception as exception:
-                            print(exception)
+                            print(repr(exception))
                             print("Cannot load line, check your format:", line)
                     else:
                         full_text_list.append(line)

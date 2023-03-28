@@ -129,7 +129,7 @@ def build_frequency_dict(vocabs):
                     frequency_dict = None
                     conditional_frequency_dict = {}
             except Exception as exception:
-                print(exception)
+                print(repr(exception))
                 frequency_dict = None
                 conditional_frequency_dict = {}
 
@@ -142,7 +142,7 @@ def build_frequency_dict(vocabs):
                     print("Use cache :", (path, format, labels))
                     continue
             except Exception as exception:
-                print(exception)
+                print(repr(exception))
 
         with open(path, "r", encoding=format) as file:
             for line in file.readlines():
@@ -157,7 +157,7 @@ def build_frequency_dict(vocabs):
                         content = line
                         process_content(content, conditional_frequency_dict, vocabs)
                 except Exception as exception:
-                    print(exception)
+                    print(repr(exception))
                     print("Cannot load line, check your format:", line)
 
     with gzip.open(frequency_dict_path, "wb") as file:
@@ -211,7 +211,7 @@ def load_frequency_dict(vocabs):
                 else:
                     conditional_frequency_dict: Dict = build_frequency_dict(vocabs=vocabs)
             except Exception as exception:
-                print(exception)
+                print(repr(exception))
                 conditional_frequency_dict: Dict = build_frequency_dict(vocabs=vocabs)
 
     return conditional_frequency_dict
@@ -241,7 +241,7 @@ def load_probabilistic_model(vocabs, conditional_frequency_dict=None):
                         conditional_frequency_dict = load_frequency_dict(vocabs)
                     conditional_probabilistic_dict: Dict = build_probabilistic_model(conditional_frequency_dict, vocabs)
             except Exception as exception:
-                print(exception)
+                print(repr(exception))
                 conditional_probabilistic_dict: Dict = build_probabilistic_model(conditional_frequency_dict, vocabs)
 
     return conditional_probabilistic_dict
