@@ -6,14 +6,14 @@ def get_parser():
 
     parser = argparse.ArgumentParser(description='Pinyin config')
 
-    parser.add_argument('--model-path', type=str, default="models/bigram_std", help='model folder path(config.json should be included in the folder)')
+    parser.add_argument('--model-path', type=str, default="models/bigram_std", help='model folder path')
 
-    parser.add_argument('--output-file-path', type=str, default=os.path.join(current_path, "./output.txt"), help='output path')
+    parser.add_argument('--output-file-path', type=str, default=os.path.join(current_path, "./output.txt"), help='output file path')
 
-    parser.add_argument('--input-file-path', type=str, default=None, help='input path')
-    parser.add_argument('--std-file-path', type=str, default=None, help='std output path')
-    parser.add_argument('--vocab-file-path', type=str, default=None, help='vocab path')
-    parser.add_argument('--pinyin-file-path', type=str, default=None, help='pinyin path')
+    parser.add_argument('--input-file-path', type=str, default=None, help='input file path or interactive')
+    parser.add_argument('--std-file-path', type=str, default=None, help='std output file path')
+    parser.add_argument('--vocab-file-path', type=str, default=None, help='vocab file path')
+    parser.add_argument('--pinyin-file-path', type=str, default=None, help='pinyin file path')
 
     parser.add_argument('--probability-function', type=str, default="interpolation", help='probability function type(interpolation / laplace)')
     parser.add_argument('--interpolation-lambda', type=float, default=0.03, help='lambda for interpolation probability function')

@@ -107,6 +107,22 @@ def inference():
 
     print("Inferencing")
 
+    if "interactive" in args.input_file_path:
+        print_parameter(args)
+        while True:
+            try:
+                input_pinyin = input("pinyin (stop to exit):")
+                if "stop" in input_pinyin:
+                    exit()
+                start_time = time.time()
+                answer = process_fn(input_pinyin)
+                stop_time = time.time()
+                print("answer :", answer)
+                print("Time usage : {}s".format(str(round(stop_time - start_time, 2))))
+                time_usage += stop_time - start_time
+            except Exception as exception:
+                print(repr(exception))
+
     for (input_file_path, input_format), (output_file_path, output_format) in zip(input_path, output_path):
         with open(input_file_path, "r", encoding=input_format) as input_file:
             start_time = time.time()
@@ -123,7 +139,7 @@ def inference():
 if __name__ == "__main__":
     time_usage = inference()
     print_parameter(args)
-    print("Time usage : {}s".format(str(round(time_usage, 2))))
+    print("Total time usage : {}s".format(str(round(time_usage, 2))))
 
     sentence_acc, word_acc = eval()
     print("sentence accuracy :", sentence_acc)
