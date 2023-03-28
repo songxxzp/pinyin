@@ -32,11 +32,10 @@ def std_top_k_selector(seq_list: List[Tuple[float, str]], std_list, top_k=1) -> 
         choose top k answers from a list
         return seq_list[:top_k], put std in seq_list[0]
     """
-    idx = 0
     for idx, seq in enumerate(seq_list):
         if seq[1] in std_list:
+            seq_list[0], seq_list[idx] = seq_list[idx], seq_list[0]
             break
-    seq_list[0], seq_list[idx] = seq_list[idx], seq_list[0]
     return seq_list[:top_k]
 
 
