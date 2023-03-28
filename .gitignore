@@ -1,2 +1,3 @@
 *.gz
 *.cache
+!models/bigram_std/*

@@ -6,6 +6,7 @@ import gzip
 from typing import Dict, List
 
 from config import *
+from utils import extract_data_path
 
 
 def load_vocab():
@@ -105,15 +106,18 @@ def build_frequency_dict(vocabs):
     frequency_dict = None  # frequency dict cache
 
     if os.path.exists(frequency_dict_path + ".cache"):  # use cache
+        print("Loading cache")
         with gzip.open(frequency_dict_path + ".cache", "rb") as file:
             frequency_dict = pickle.load(file)
             try:
                 if "config" in frequency_dict and config["max_prefix_length"] == frequency_dict["config"]["max_prefix_length"]:
                     print("Loaded cache, trained on:")
                     cache_check = True
+                    corpus_basenames = [os.path.basename(data_path) for data_path, _, _ in corpora_path]
+                    frequency_dict["config"]["corpora_path"] = extract_data_path(frequency_dict["config"]["corpora_path"])
                     for path, format, labels in frequency_dict["config"]["corpora_path"]:
                         print((path, format, labels))
-                        if path not in [data_path for data_path, _, _ in corpora_path]:
+                        if os.path.basename(path) not in corpus_basenames:
                             print("Unknown :", path)
                             cache_check = False
                     if cache_check:
@@ -134,7 +138,7 @@ def build_frequency_dict(vocabs):
 
         if frequency_dict is not None:
             try:
-                if path in [data_path for data_path, _, _ in frequency_dict["config"]["corpora_path"]]:
+                if os.path.basename(path) in [os.path.basename(data_path) for data_path, _, _ in frequency_dict["config"]["corpora_path"]]:
                     print("Use cache :", (path, format, labels))
                     continue
             except Exception as exception:
