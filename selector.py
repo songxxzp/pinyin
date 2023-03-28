@@ -39,7 +39,7 @@ def std_top_k_selector(seq_list: List[Tuple[float, str]], std_list, top_k=1) -> 
     return seq_list[:top_k]
 
 
-def get_top_k_selector(selector_type="default", device=None, tokenizer_name="uer/gpt2-chinese-cluecorpussmall", model_name="uer/gpt2-chinese-cluecorpussmall", batch_size=0):
+def get_top_k_selector(selector_type="default", device=None, tokenizer_path=None, model_path=None, batch_size=0):
     """
         return a selector
     """
@@ -52,7 +52,29 @@ def get_top_k_selector(selector_type="default", device=None, tokenizer_name="uer
                 device="cuda"
             else:
                 device="cpu"
-        model, tokenizer = load_gpt_model(device=device, tokenizer_name=tokenizer_name, model_name=model_name)
+        if tokenizer_path and model_path:
+            model, tokenizer = load_gpt_model(device=device, tokenizer_path=tokenizer_path, model_path=model_path)
+        else:
+            model, tokenizer = load_gpt_model(device=device)
+        selector = partial(
+            gpt_top_k_selector,
+            model=model,
+            tokenizer=tokenizer,
+            perplexity=perplexity,
+            batch_size=batch_size
+        )
+    elif selector_type == "glm":
+        from glm import load_glm_model, perplexity
+        if device is None:
+            import torch
+            if torch.cuda.is_available():
+                device="cuda"
+            else:
+                device="cpu"
+        if tokenizer_path and model_path:
+            model, tokenizer = load_glm_model(device=device, tokenizer_path=tokenizer_path, model_path=model_path)
+        else:
+            model, tokenizer = load_glm_model(device=device)
         selector = partial(
             gpt_top_k_selector,
             model=model,

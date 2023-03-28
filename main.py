@@ -84,9 +84,9 @@ def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_condit
 
 def inference():
     _, pinyin_dict = load_vocab()
-    final_selector = get_top_k_selector(args.final_top_k_selector, device=args.device, batch_size=args.batch_size) # default, std, gpt
-    storage_selector = get_top_k_selector(args.storage_top_k_selector, device=args.device, batch_size=args.batch_size)
-    calculate_selector = get_top_k_selector(args.calculate_top_k_selector, device=args.device, batch_size=args.batch_size)
+    final_selector = get_top_k_selector(args.final_top_k_selector, device=args.device, batch_size=args.batch_size, tokenizer_path=args.lm_tokenizer_path, model_path=args.lm_model_path) # default, std, gpt, glm
+    storage_selector = get_top_k_selector(args.storage_top_k_selector, device=args.device, batch_size=args.batch_size, tokenizer_path=args.lm_tokenizer_path, model_path=args.lm_model_path)
+    calculate_selector = get_top_k_selector(args.calculate_top_k_selector, device=args.device, batch_size=args.batch_size, tokenizer_path=args.lm_tokenizer_path, model_path=args.lm_model_path)
     probability_fn = get_probability_function(args.probability_function, para_lambda=args.interpolation_lambda, normalized=args.normalized)  # interpolation, laplace
 
     args.max_conditional_prefix_length = min(args.max_conditional_prefix_length, max_prefix_length)

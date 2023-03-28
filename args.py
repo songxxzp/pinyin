@@ -26,6 +26,8 @@ def get_parser():
     parser.add_argument('--final-top-k-selector', type=str, default="default", help='top k selector used when final state')
     parser.add_argument('--batch-size', type=int, default=0, help='batch_size for lm(0 for infinite)')
     parser.add_argument('--device', type=str, default="cuda", help='device for lm')
+    parser.add_argument('--lm-tokenizer-path', type=str, default=None, help='tokenizer path for lm')
+    parser.add_argument('--lm-model-path', type=str, default=None, help='model path for lm')
     
     return parser
     
