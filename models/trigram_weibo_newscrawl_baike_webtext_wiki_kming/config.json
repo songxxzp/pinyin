@@ -12,13 +12,10 @@
         ["/home/song/下载/拼音输入法作业-2023春/语料库/语料库/sina_news_gbk/2016-09.txt", "gbk", ["html", "title"]],
         ["/home/song/下载/拼音输入法作业-2023春/语料库/语料库/sina_news_gbk/2016-10.txt", "gbk", ["html", "title"]],
         ["/home/song/下载/拼音输入法作业-2023春/语料库/语料库/sina_news_gbk/2016-11.txt", "gbk", ["html", "title"]],
-        ["/home/song/data/news.2017.zh.shuffled.deduped", "utf-8", []],
-        ["/home/song/data/news.2018.zh.shuffled.deduped", "utf-8", []],
-        ["/home/song/data/news.2019.zh.shuffled.deduped", "utf-8", []],
-        ["/home/song/data/news.2020.zh.shuffled.deduped", "utf-8", []],
-        ["/home/song/data/news.2021.zh.shuffled.deduped", "utf-8", []],
-        ["/home/song/data/news.2022.zh.shuffled.deduped", "utf-8", []],
-        ["/home/song/data/baike2018qa/baike_qa_train.json", "utf-8", ["title", "desc", "answer"]]
+        ["/home/song/data/news_crawl", "utf-8", []],
+        ["/home/song/data/baike2018qa/baike_qa_train.json", "utf-8", ["title", "desc", "answer"]],
+        ["/home/song/data/wiki_zh/", "utf-8", ["title", "text"]],
+        ["/home/song/data/news.jsonl", "utf-8", ["title", "description", "content"]]
     ],
     "vocab_path": [["/home/song/下载/拼音输入法作业-2023春/拼音汉字表/一二级汉字表.txt", "gbk"]],
     "pinyin_path": [["/home/song/下载/拼音输入法作业-2023春/拼音汉字表/拼音汉字表.txt", "gbk"]]
