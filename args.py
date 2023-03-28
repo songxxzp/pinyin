@@ -6,7 +6,7 @@ def get_parser():
 
     parser = argparse.ArgumentParser(description='Pinyin config')
 
-    parser.add_argument('--model-path', type=str, required=True, help='model folder path(config.json should be included in the folder)')
+    parser.add_argument('--model-path', type=str, default="models/bigram_std", help='model folder path(config.json should be included in the folder)')
 
     parser.add_argument('--output-file-path', type=str, default=os.path.join(current_path, "./output.txt"), help='output path')
 

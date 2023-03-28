@@ -25,6 +25,9 @@ def load_config(model_path, output_file_path: Union[List, None]=None, input_file
     global max_prefix_length, corpora_path, vocab_path, pinyin_path
     global input_path, std_output_path, output_path
 
+    if not os.path.isabs(model_path):
+        model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), model_path)
+
     model_config_path = os.path.join(model_path, "config.json")
     frequency_dict_path = os.path.join(model_path, "frequency_dict.gz")
     probabilistic_model_path = os.path.join(model_path, "probabilistic_model.gz")

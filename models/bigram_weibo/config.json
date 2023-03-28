@@ -1,0 +1,7 @@
+{
+    "max_prefix_length": 1,
+    "corpora_path": [
+        ["/home/song/data/SMP2020/usual_train_new.txt", "gbk", []],
+        ["/home/song/data/sina_news_gbk", "gbk", ["html", "title"]]
+    ]
+}

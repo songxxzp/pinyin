@@ -89,11 +89,13 @@ def inference():
     calculate_selector = get_top_k_selector(args.calculate_top_k_selector, device=args.device, batch_size=args.batch_size)
     probability_fn = get_probability_function(args.probability_function, para_lambda=args.interpolation_lambda, normalized=args.normalized)  # interpolation, laplace
 
+    args.max_conditional_prefix_length = min(args.max_conditional_prefix_length, max_prefix_length)
+
     process_fn = partial(
         pinyin_to_character,
         probability_fn=probability_fn,
         pinyin_dict=pinyin_dict,
-        max_conditional_prefix_length=min(args.max_conditional_prefix_length, max_prefix_length),
+        max_conditional_prefix_length=args.max_conditional_prefix_length,
         top_k_storage=args.top_k_storage,
         top_k_calculate=args.top_k_calculate,
         final_top_k_selector=final_selector,

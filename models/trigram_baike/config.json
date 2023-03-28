@@ -1,0 +1,7 @@
+{
+    "max_prefix_length": 2,
+    "corpora_path": [
+        ["/home/song/下载/拼音输入法作业-2023春/语料库/语料库/sina_news_gbk", "gbk", ["html", "title"]],
+        ["/home/song/data/baike2018qa/baike_qa_train.json", "utf-8", ["title", "desc", "answer"]]
+    ]
+}
