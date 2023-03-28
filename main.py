@@ -107,7 +107,7 @@ def inference():
 
     print("Inferencing")
 
-    if "interactive" in args.input_file_path:
+    if args.input_file_path is not None and "interactive" in args.input_file_path:
         print_parameter(args)
         while True:
             try:
