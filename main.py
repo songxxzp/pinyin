@@ -13,7 +13,7 @@ from config import load_config
 current_path = os.path.dirname(os.path.realpath(__file__))
 
 load_config(
-    model_path="/home/song/workspace/pinyin/trigram_weibo_newscrawl_baike_webtext_wiki",  # trigram_weibo_newscrawl_baike_webtext, trigram_weibo_newscrawl_baike, trigram_newscrawl_baike, bigram_weibo
+    model_path="/home/junli/workspace/pinyin/trigram_sina_weibo_newscrawl_baike_webtext_wiki",  # trigram_weibo_newscrawl_baike_webtext, trigram_weibo_newscrawl_baike, trigram_newscrawl_baike, bigram_weibo
     output_file_path=os.path.join(current_path, "./output_default_selector.txt")
 )
 
@@ -25,7 +25,7 @@ from probability import get_probability_function
 from model import load_vocab
 
 
-interpolation_lambda = 0.01  # 0.03
+interpolation_lambda = 0.03  # 0.03
 top_k_storage = 10
 top_k_calculate = 10
 max_conditional_prefix_length = 2
@@ -81,7 +81,7 @@ def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_condit
 
     sentences = [sentence for _, sentence in final_search_state]  # sort from high prob to low prob
 
-    return top_k_selector(seq_list=sentences)
+    return top_k_selector(seq_list=sentences)[0]
 
 
 def inference():

@@ -1,33 +1,36 @@
 from typing import List
 from functools import partial
 
-def default_top_k_selector(seq_list: List[str]) -> str:
+def default_top_k_selector(seq_list: List[str], top_k=1) -> str:
     """
-        choose one answer from a list
-        return seq_list[0] as default
+        choose top k answers from a list
+        return seq_list[:top_k] as default
     """
-    return seq_list[0]
+    return seq_list[:top_k]
 
 
-def gpt_top_k_selector(seq_list: List[str], model, tokenizer, perplexity) -> str:
+def gpt_top_k_selector(seq_list: List[str], model, tokenizer, perplexity, top_k=1) -> str:
     """
-        choose one answer from a list
+        choose top k answers from a list
         return seq with minima PPL
     """
     ppl = perplexity(seq_list, model, tokenizer)
-    seq = seq_list[ppl.index(min(ppl))]
-    return seq
+    seq_tuples = list(zip(seq_list, ppl))
+    seq_tuples.sort(key=lambda x:x[1])
+    return [seq[0] for seq in seq_tuples[:top_k]]
 
 
-def std_top_k_selector(seq_list: List[str], std_list) -> str:
+def std_top_k_selector(seq_list: List[str], std_list, top_k=1) -> str:
     """
-        choose one answer from a list
-        return seq if seq in std_list, else return seq_list[0] as default 
+        choose top k answers from a list
+        return seq_list[:top_k], put std in seq_list[0]
     """
-    for seq in seq_list:
+    idx = 0
+    for idx, seq in enumerate(seq_list):
         if seq in std_list:
-            return seq
-    return seq_list[0]
+            break
+    seq_list[0], seq_list[idx] = seq_list[idx], seq_list[0]
+    return seq_list[:top_k]
 
 
 def get_top_k_selector(selector_type="default", device=None, tokenizer_name="uer/gpt2-chinese-cluecorpussmall", model_name="uer/gpt2-chinese-cluecorpussmall"):
