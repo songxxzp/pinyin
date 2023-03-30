@@ -2,6 +2,8 @@ import torch
 import json
 import random
 
+from utils import extract_data_path
+
 from torch.nn import CrossEntropyLoss
 from typing import List, Dict
 from torch import tensor
@@ -10,7 +12,7 @@ from transformers import BertTokenizerFast, AutoModel, AutoTokenizer, GPT2Config
 from datasets import load_dataset
 
 device = "cuda"
-model_config_path = "/home/junli/workspace/pinyin/trigram_newscrawl/config.json"
+model_config_path = "/home/junli/workspace/pinyin/trigram_sina_newscrawl_baike_webtext_wiki/config.json"
 vocab_path = [["/data/TST/pinyin/拼音输入法作业-2023春/拼音汉字表/一二级汉字表.txt", "gbk"]]
 pinyin_path = [["/data/TST/pinyin/拼音输入法作业-2023春/拼音汉字表/拼音汉字表.txt", "gbk"]]
 
@@ -43,7 +45,7 @@ def process_data():
     full_text_list = []
     with open(model_config_path, "r", encoding="utf-8") as file:
         config = json.load(file)
-        for path, format, labels in config["corpora_path"]:  # should be jsonl or txt
+        for path, format, labels in extract_data_path(config["corpora_path"]):  # should be jsonl or txt
             with open(path, "r", encoding=format) as file:
                 for line in file.readlines():
                     line = line.rstrip('\n')
@@ -61,7 +63,7 @@ def process_data():
 
     full_text_list = [{"text": text} for text in full_text_list]
 
-    with open("full_text_list.json", "w", encoding="utf-8") as file:
+    with open("trigram_sina_newscrawl_baike_webtext_wiki.json", "w", encoding="utf-8") as file:
         json.dump(
             {
                 "model_config_path": model_config_path,
@@ -73,40 +75,41 @@ def process_data():
 
 
 def load_data():
-    with open("full_text_list.json", "r", encoding="utf-8") as file:
+    with open("trigram_sina_newscrawl_baike_webtext_wiki.json", "r", encoding="utf-8") as file:
         return json.load(file)
 
 
 # process_data()
 
 
-data_dict = load_data()
-data_list = data_dict["data"]
-random.seed(42)
-random.shuffle(data_list)
-part_text_list = data_list[:100000]
+# data_dict = load_data()
+# data_list = data_dict["data"]
+# random.seed(42)
+# random.shuffle(data_list)
+# part_text_list = data_list  # [:10000000]
+
+# print(len(data_list))
+
+# with open("train.json", "w", encoding="utf-8") as file:
+#     json.dump(
+#         {
+#             "model_config_path": model_config_path,
+#             "data": part_text_list[:int(0.95 * len(part_text_list))]
+#         },
+#         file,
+#         ensure_ascii=False
+#     )
 
 
-with open("train.json", "w", encoding="utf-8") as file:
-    json.dump(
-        {
-            "model_config_path": model_config_path,
-            "data": part_text_list[:int(0.75 * len(part_text_list))]
-        },
-        file,
-        ensure_ascii=False
-    )
-
-
-with open("test.json", "w", encoding="utf-8") as file:
-    json.dump(
-        {
-            "model_config_path": model_config_path,
-            "data": part_text_list[int(0.75 * len(part_text_list)):]
-        },
-        file,
-        ensure_ascii=False
-    )
+# with open("test.json", "w", encoding="utf-8") as file:
+#     json.dump(
+#         {
+#             "model_config_path": model_config_path,
+#             "data": part_text_list[int(0.95 * len(part_text_list)):]
+#         },
+#         file,
+#         ensure_ascii=False
+#     )
 
 
 tokenizer = BertTokenizer.from_pretrained("uer/gpt2-chinese-cluecorpussmall")
@@ -137,11 +140,11 @@ training_args = TrainingArguments(
     overwrite_output_dir=True, #overwrite the content of the output directory
     num_train_epochs=1, # number of training epochs
     per_device_train_batch_size=2, # batch size for training
-    per_device_eval_batch_size=4,  # batch size for evaluation
-    eval_steps = 400, # Number of update steps between two evaluations.
-    save_steps=800, # after # steps model is saved
+    per_device_eval_batch_size=8,  # batch size for evaluation
+    eval_steps = 5000, # Number of update steps between two evaluations.
+    save_steps=5000, # after # steps model is saved
     warmup_steps=500,# number of warmup steps for learning rate scheduler
-    )
+)
 
 trainer = Trainer(
     model=model,
