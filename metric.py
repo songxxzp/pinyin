@@ -1,7 +1,5 @@
 import json
 
-from config import *
-
 
 def sentence_accuracy(outputs, std_outputs):
     total = len(std_outputs)
@@ -25,6 +23,8 @@ def word_accuracy(outputs, std_outputs):
 
 
 def eval():
+    from config import std_output_path, output_path
+
     for (std_output_file_path, std_output_format), (output_file_path, output_format) in zip(std_output_path, output_path):
         with open(output_file_path, "r", encoding=output_format) as output_file:
             outputs = [line.rstrip() for line in output_file.readlines()]

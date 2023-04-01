@@ -1,37 +1,15 @@
-import os
-import sys
-import json
-import math
 import time
-import copy
 
-from typing import List
 from functools import partial
 
 from args import get_parser
-parser = get_parser()
-args = parser.parse_args()
-
 from config import load_config
-
-load_config(
-    model_path=args.model_path,
-    output_file_path=args.output_file_path,
-    input_file_path=args.input_file_path,
-    std_file_path=args.std_file_path,
-    vocab_file_path=args.vocab_file_path,
-    pinyin_file_path=args.pinyin_file_path
-)
-
-from config import *
-
-from metric import eval
 from selector import default_top_k_selector, get_top_k_selector
-from probability import get_probability_function
-from model import load_vocab
+from metric import eval
 
 
 def print_parameter(args):
+    print("model path :", args.model_path)
     print("max conditional prefix length :", args.max_conditional_prefix_length)
     print("top k storage :", args.top_k_storage)
     print("top k calculate :", args.top_k_calculate)
@@ -82,7 +60,11 @@ def pinyin_to_character(pinyin_str: str, probability_fn, pinyin_dict, max_condit
     return final_top_k_selector(seq_list=final_search_state)[0][1]
 
 
-def inference():
+def inference(args):
+    from probability import get_probability_function
+    from model import load_vocab
+    from config import max_prefix_length, input_path, output_path
+
     _, pinyin_dict = load_vocab()
     final_selector = get_top_k_selector(args.final_top_k_selector, device=args.device, batch_size=args.batch_size, tokenizer_path=args.lm_tokenizer_path, model_path=args.lm_model_path) # default, std, gpt, glm
     storage_selector = get_top_k_selector(args.storage_top_k_selector, device=args.device, batch_size=args.batch_size, tokenizer_path=args.lm_tokenizer_path, model_path=args.lm_model_path)
@@ -136,11 +118,27 @@ def inference():
     return time_usage
 
 
-if __name__ == "__main__":
-    time_usage = inference()
+def main(args):
+    load_config(
+        model_path=args.model_path,
+        output_file_path=args.output_file_path,
+        input_file_path=args.input_file_path,
+        std_file_path=args.std_file_path,
+        vocab_file_path=args.vocab_file_path,
+        pinyin_file_path=args.pinyin_file_path
+    )
+
+    time_usage = inference(args)
     print_parameter(args)
     print("Total time usage : {}s".format(str(round(time_usage, 2))))
 
     sentence_acc, word_acc = eval()
     print("sentence accuracy :", sentence_acc)
     print("word accuracy :", word_acc)
+    return (time_usage, sentence_acc, word_acc)
+
+
+if __name__ == "__main__":
+    parser = get_parser()
+    args = parser.parse_args()
+    main(args)
