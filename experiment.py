@@ -14,10 +14,14 @@ if __name__ == "__main__":
 
     model_path_list = ["models/bigram", "models/bigram_std", "models/bigram_weibo_baike_webtext_wiki", "models/bigram_weibo_newscrawl_baike_webtext_wiki", "models/trigram", "models/trigram_std", "models/trigram_weibo_baike_webtext_wiki", "models/trigram_weibo_newscrawl_baike_webtext_wiki"]
 
-    # top_k_list = [1, 3, 5, 10]
-    top_k_list = [1]
-    final_selector_list = ["default"]
-    # final_selector_list = ["std", "default", "gpt"]
+    top_k_list = [1, 3, 5, 10]
+
+    final_selector_list = ["std", "default", "gpt"]
+
+    # probability_function
+    # lambda
+    # normalized
+    # language modeling
 
     result_dict = {}
     result_list = []
@@ -44,11 +48,3 @@ if __name__ == "__main__":
 
     with open(os.path.join(results_path, "results.pkl"), "wb") as file:
         pickle.dump(result_dict, file)
-
-    # parser.add_argument('--probability-function', type=str, default="interpolation", help='probability function type(interpolation / laplace)')
-    # parser.add_argument('--interpolation-lambda', type=float, default=0.03, help='lambda for interpolation probability function')
-    # parser.add_argument('--normalized', type=bool, default=False, help='normalize probability function')
-
-    # parser.add_argument('--lm-tokenizer-path', type=str, default=None, help='tokenizer path for lm')
-    # parser.add_argument('--lm-model-path', type=str, default=None, help='model path for lm')
-
