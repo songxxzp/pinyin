@@ -19,6 +19,8 @@ def print_parameter(args):
     if args.final_top_k_selector == "gpt" or args.storage_top_k_selector == "gpt" or args.calculate_top_k_selector == "gpt":
         if args.batch_size:
             print("    batchsize", args.batch_size)
+        print("    lm tokenizer :", args.lm_tokenizer_path)
+        print("    lm model :", args.lm_model_path)
         print("    device", args.device)
     print("probability function :", args.probability_function)
     if args.probability_function == "interpolation":
