@@ -40,7 +40,7 @@ if __name__ == "__main__":
     with open(os.path.join(results_path, "results.json"), "w", encoding="utf-8") as file:
         json.dump(result_list, file)
 
-    with open(os.path.join(results_path, "results.pkl"), "wb", encoding="utf-8") as file:
+    with open(os.path.join(results_path, "results.pkl"), "wb") as file:
         pickle.dump(result_dict, file)
 
     # parser.add_argument('--probability-function', type=str, default="interpolation", help='probability function type(interpolation / laplace)')
