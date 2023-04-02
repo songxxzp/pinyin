@@ -5,11 +5,11 @@ import gzip
 
 from typing import Dict, List
 
-from config import *
 from utils import extract_data_path
 
 
 def load_vocab():
+    from config import vocab_path, pinyin_path
     # load vocab
     vocabs = {}
     for path, format in vocab_path:
@@ -85,7 +85,7 @@ def get_conditional_probability(conditional_probabilistic_dict, prefix, token):
     return conditional_probabilistic_dict[prefix][token]
 
 
-def process_content(content, conditional_frequency_dict, vocabs):
+def process_content(content, conditional_frequency_dict, vocabs, max_prefix_length):
     # split content by none vocabs
     text_list = split(content, vocabs=vocabs)
     for text in text_list:
@@ -100,6 +100,7 @@ def process_content(content, conditional_frequency_dict, vocabs):
 
 
 def build_frequency_dict(vocabs):
+    from config import frequency_dict_path, config, corpora_path, max_prefix_length
     # build frequency dict
     print("Building conditional frequency dict")
     conditional_frequency_dict = {}
@@ -152,10 +153,10 @@ def build_frequency_dict(vocabs):
                         content_dict = json.loads(line)
                         for label in labels:
                             content = content_dict[label]
-                            process_content(content, conditional_frequency_dict, vocabs)
+                            process_content(content, conditional_frequency_dict, vocabs, max_prefix_length)
                     else:
                         content = line
-                        process_content(content, conditional_frequency_dict, vocabs)
+                        process_content(content, conditional_frequency_dict, vocabs, max_prefix_length)
                 except Exception as exception:
                     print(repr(exception))
                     print("Cannot load line, check your format:", line)
@@ -174,6 +175,7 @@ def build_frequency_dict(vocabs):
 
 
 def build_probabilistic_model(conditional_frequency_dict, vocabs):
+    from config import probabilistic_model_path, config
     # build probabilistic model
     print("Building probabilistic model")
     conditional_probabilistic_dict = {}
@@ -200,6 +202,7 @@ def build_probabilistic_model(conditional_frequency_dict, vocabs):
 
 
 def load_frequency_dict(vocabs):
+    from config import frequency_dict_path, config
     if not os.path.exists(frequency_dict_path):
         conditional_frequency_dict: Dict = build_frequency_dict(vocabs=vocabs)
     else:
@@ -225,6 +228,7 @@ def load_prefix_frequency_dict(conditional_frequency_dict):
 
 
 def load_probabilistic_model(vocabs, conditional_frequency_dict=None):
+    from config import probabilistic_model_path, config
     if not os.path.exists(probabilistic_model_path):
         if conditional_frequency_dict is None:
             conditional_frequency_dict = load_frequency_dict(vocabs)

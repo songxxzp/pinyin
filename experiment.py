@@ -2,7 +2,6 @@ import json
 import pickle
 import os
 
-from main import main
 from args import get_parser
 
 
@@ -15,9 +14,10 @@ if __name__ == "__main__":
 
     model_path_list = ["models/bigram", "models/bigram_std", "models/bigram_weibo_baike_webtext_wiki", "models/bigram_weibo_newscrawl_baike_webtext_wiki", "models/trigram", "models/trigram_std", "models/trigram_weibo_baike_webtext_wiki", "models/trigram_weibo_newscrawl_baike_webtext_wiki"]
 
-    top_k_list = [1, 3, 5, 10]
-
-    final_selector_list = ["std", "default", "gpt"]
+    # top_k_list = [1, 3, 5, 10]
+    top_k_list = [1]
+    final_selector_list = ["default"]
+    # final_selector_list = ["std", "default", "gpt"]
 
     result_dict = {}
     result_list = []
@@ -31,7 +31,9 @@ if __name__ == "__main__":
                 args.storage_top_k_selector = top_k
                 args.final_top_k_selector = final_selector
                 args.output_file_path = output_file_path
+                args.max_conditional_prefix_length = 2
 
+                from main import main
                 time_usage, sentence_acc, word_acc = main(args)
                 
                 result_dict[(model_path, top_k, final_selector)] = (time_usage, sentence_acc, word_acc)
