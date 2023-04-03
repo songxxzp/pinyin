@@ -1,3 +1,6 @@
 *.gz
 *.cache
+*.pyc
+src/__pycache__/*
 !models/bigram_std/*
+!models/bigram/*

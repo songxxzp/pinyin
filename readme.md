@@ -1,24 +1,32 @@
 ## Pinyin IME Project
 
-项目仓库（截止日期后会设置为public）：https://github.com/songxxzp/pinyin
+项目仓库（为便于检查，截止日期后会设置为public）：https://github.com/songxxzp/pinyin
 > git clone git@github.com:songxxzp/pinyin.git
+
+### 项目结构
+| dir | statement |
+| --- | --------- |
+| data | 输入输出文件 |
+| src | 源代码 |
+| results | 实验结果 |
+| models | 概率模型 |
 
 ### 运行方式
 #### 基本使用方式
 ```
-python main.py
+python src/main.py
 ```
 将按照默认参数运行
 #### 传入参数
 ```
-python main.py --model-path "models/bigram" --input-file-path interactive
+python src/main.py --model-path "models/bigram" --input-file-path interactive
 
-python main.py --model-path "models/bigram" --input-file-path "task_data/input.txt" --output-file-path "results/output.txt"
+python src/main.py --model-path "models/bigram" --input-file-path "data/input.txt" --output-file-path "data/output.txt"
 ```
 会加载`bigram`模型（使用`sina news`训练的模型），并以交互模式运行。
 #### 参数说明
 ```
-python main.py -h
+python src/main.py -h
 ```
 | 参数 | 说明 |
 | ---- | ---- |
@@ -26,14 +34,14 @@ python main.py -h
 | --output-file-path | 输出文件 |
 | --input-file-path | 拼音输入文件，interactive为交互模式，默认为作业测试输入 |
 | --std-file-path | 标准答案文件，默认为作业测试标准输出 |
-| --vocab-file-path | 
-| --pinyin-file-path | 
-| --probability-function |
+| --vocab-file-path | 词表 |
+| --pinyin-file-path | 拼音表 |
+| --probability-function | 概率函数，默认为插值 |
 | --interpolation-lambda | 差值系数，建议0.03 |
 | --top-k-storage | top k |
 | --top-k-calculate | top k |
 | --max-conditional-prefix-length | 前缀长度 |
-| --final-top-k-selector | 最终top k选择，std, default, gpt |
+| --final-top-k-selector | 最终top k选择器，(std, default, gpt)。std可以计算top k召回率。 |
 | --batch-size | for gpt |
 | --device | for gpt |
 | --lm-tokenizer-path | for gpt |
@@ -63,7 +71,7 @@ python main.py -h
 
     其中`corpora_path`中元素由三元组组成`(path, format, labels)`。若`labels`为`[]`，则将语料作为`txt`处理，否则作为`jsonl`处理，并处理`labels`中的内容。`path`若为一目录，将处理其下全部文件。
 
-3. 运行`python main.py --model-path "models/trigram_custom"`。若不存在以构建的模型，会根据`models/trigram_custom`目录下的`config.json`自行构建模型。在构建`trigram`模型时，请保证内存充足。
+3. 运行`python src/main.py --model-path "models/trigram_custom"`。若不存在以构建的模型，会根据`models/trigram_custom`目录下的`config.json`自行构建模型。在构建`trigram`模型时，请保证内存充足。
 
 4. `models`中包括了部分预设的`config.json`，请更改语料路径后使用。也可下载已构建好的模型：https://cloud.tsinghua.edu.cn/d/cffa2e2502ed4fd59d1b/
 
